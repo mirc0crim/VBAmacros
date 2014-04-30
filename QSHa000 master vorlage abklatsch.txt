@@ -1,0 +1,35 @@
+Sub a()
+
+    myRow = 10 'Starting row below table header
+    q1 = 0 'No of Sehr gut
+    q2 = 0 'No of gut
+    q3 = 0 'No of genügend
+    q4 = 0 'No of ungenügend
+    
+    Do While Sheets("Dokument").Range("B" & myRow) <> "" 'As long as there are entries in column B
+        rowIsVisible = (Sheets("Dokument").Range("E" & myRow).EntireRow.Hidden = False)
+        rowIsBigEnough = (Sheets("Vorgaben").Range("E2") <= myRow)
+        rowIsSmallEnough = (Sheets("Vorgaben").Range("E3") >= myRow)
+        If (rowIsVisible And rowIsBigEnough And rowIsSmallEnough) Then 'Increment count of corresponding category
+            If (Sheets("Dokument").Range("E" & myRow) = Sheets("Dokument").Range("G2")) Then
+                q1 = q1 + 1
+            End If
+            If (Sheets("Dokument").Range("E" & myRow) = Sheets("Dokument").Range("G3")) Then
+                q2 = q2 + 1
+            End If
+            If (Sheets("Dokument").Range("E" & myRow) = Sheets("Dokument").Range("G4")) Then
+                q3 = q3 + 1
+            End If
+            If (Sheets("Dokument").Range("E" & myRow) = Sheets("Dokument").Range("G5")) Then
+                q4 = q4 + 1
+            End If
+        End If
+        myRow = myRow + 1
+    Loop
+    
+    Sheets("Vorgaben").Range("E7").Value = q1 '
+    Sheets("Vorgaben").Range("E8").Value = q2 'Store category counts in
+    Sheets("Vorgaben").Range("E9").Value = q3 'E7:E10 for the diagram
+    Sheets("Vorgaben").Range("E10").Value = q4 '
+
+End Sub

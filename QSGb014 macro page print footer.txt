@@ -1,0 +1,77 @@
+Private Sub printALL_Click()
+
+    ActiveDocument.Repaginate
+    Dim i As Integer
+    i = ActiveDocument.BuiltInDocumentProperties(wdPropertyPages)
+    
+    setFooter ((i - 1) & " Seiten")
+    
+    Application.ActivePrinter = "PDF Complete"
+    Application.PrintOut Range:=wdPrintFromTo, From:="1", To:=CStr(i - 1)
+
+End Sub
+
+Private Sub printNR_Click()
+
+    setFooter ("1 Seite")
+    
+    Application.ActivePrinter = "PDF Complete"
+    Application.PrintOut Range:=wdPrintFromTo, From:="4", To:="4"
+
+End Sub
+
+Private Sub printNR2_Click()
+
+    setFooter ("5 Seiten")
+    
+    Application.ActivePrinter = "PDF Complete"
+    Application.PrintOut Range:=wdPrintFromTo, From:="6", To:="10"
+
+End Sub
+
+Private Sub printNR3_Click()
+
+    setFooter ("5 Seiten")
+    
+    Application.ActivePrinter = "PDF Complete"
+    Application.PrintOut Range:=wdPrintRangeOfPages, Pages:="1,5,9-11"
+
+End Sub
+
+Sub setFooter(p As String)
+
+    Dim intSecCount As Integer
+    intSecCount = ActiveDocument.Sections.Count
+    
+    For intSection = 1 To intSecCount
+        With ActiveDocument.Sections(intSection)
+            'if messed up:
+            '.Footers(wdHeaderFooterPrimary).Range.Text = makeText() & p
+            Dim oldText As String
+            oldText = .Footers(wdHeaderFooterPrimary).Range.Text
+            .PageSetup.DifferentFirstPageHeaderFooter = False
+            If Left(Right(oldText, 9), 1) = vbTab Then
+                .Footers(wdHeaderFooterPrimary).Range.Text = Left(oldText, Len(oldText) - 8) & p
+            ElseIf Left(Right(oldText, 10), 1) = vbTab Then
+                .Footers(wdHeaderFooterPrimary).Range.Text = Left(oldText, Len(oldText) - 9) & p
+            ElseIf Left(Right(oldText, 11), 1) = vbTab Then
+                .Footers(wdHeaderFooterPrimary).Range.Text = Left(oldText, Len(oldText) - 10) & p
+            ElseIf Left(Right(oldText, 12), 1) = vbTab Then
+                .Footers(wdHeaderFooterPrimary).Range.Text = Left(oldText, Len(oldText) - 11) & p
+            End If
+        End With
+    Next intSection
+
+End Sub
+
+Function makeText() As String
+    
+    Dim myfooter As String
+    myfooter = myfooter + "Erstellung: 15.06.2012, Anon." & vbTab & vbTab & "Qualitätsicherung / Vorlage"
+    myfooter = myfooter & vbNewLine
+    myfooter = myfooter + "Prüfung   : 25.01.2013, Helen Fasel" & vbTab & vbTab & "Deklaration: Produktdaten"
+    myfooter = myfooter & vbNewLine
+    myfooter = myfooter + "Freigabe  : 25.02.2013, Eugen Reichel" & vbTab & "mirco test" & vbTab & " "
+    makeText = myfooter
+
+End Function

@@ -1,0 +1,136 @@
+Sub a()
+
+    von = Range("F2")
+    bis = Range("F3")
+    
+    f = "=SUMMEWENNS(Vorlage!C" + CStr(von) + ":C" + CStr(bis) + ";Vorlage!E" + CStr(von) + ":E" + CStr(bis) + ";A"
+    
+    myRow = 2
+    Do While Range("B" & myRow) <> ""
+        Range("B" & myRow).FormulaLocal = f + CStr(myRow) + ")"
+        myRow = myRow + 1
+    Loop
+
+End Sub
+
+Sub daily()
+    Application.ScreenUpdating = False
+    Dim first As Integer, last As Integer
+    
+    Sheets("Tägliche Auswertung").Activate
+    d = Range("A3").Value
+    
+    Sheets("Vorlage").Activate
+    myRow = 4
+    first = 0
+    Do While Range("F" & myRow) <> ""
+        If Range("F" & myRow).Value = d Then
+            If first = 0 Then
+                first = myRow
+            End If
+        End If
+        myRow = myRow + 1
+    Loop
+    myRow = first
+    Do While Range("F" & myRow).Value = d
+        myRow = myRow + 1
+    Loop
+    last = myRow - 1
+    
+    Call doAuswertung(first, last, "Tägliche Auswertung")
+    Sheets("Tägliche Auswertung").Activate
+    Application.ScreenUpdating = True
+End Sub
+
+Sub weekly()
+    Application.ScreenUpdating = False
+    Dim first As Integer, last As Integer
+
+    Sheets("Wöchentliche Auswertung").Activate
+    d1 = Range("A3").Value
+    d2 = Range("B3").Value
+    
+    Sheets("Vorlage").Activate
+    myRow = 4
+    first = 0
+    Do While Range("F" & myRow) <> ""
+        If Range("F" & myRow).Value >= d1 Then
+            If first = 0 Then
+                first = myRow
+            End If
+        End If
+        myRow = myRow + 1
+    Loop
+    myRow = first
+    Do While Range("F" & myRow) <> ""
+        If Range("F" & myRow).Value > d2 Then
+            Exit Do
+        End If
+        myRow = myRow + 1
+    Loop
+    last = myRow - 1
+    
+    Call doAuswertung(first, last, "Wöchentliche Auswertung")
+    Sheets("Wöchentliche Auswertung").Activate
+    Application.ScreenUpdating = True
+End Sub
+
+
+Sub doAuswertung(first As Integer, last As Integer, blatt As String)
+    Range("A" & first & ":K" & last).Sort _
+    Key1:=Range("E" & first & ":E" & last), Order1:=xlAscending, Header:=xlNo, Orientation:=xlTopToBottom, _
+    Key2:=Range("A" & first & ":A" & last), Order1:=xlAscending, Header:=xlNo, Orientation:=xlTopToBottom
+
+    i = 6
+    myRow = first
+
+    Do While myRow <= last
+        Sheets("Vorlage").Activate
+        cat = Range("E" & myRow).Value
+        num = ""
+        bez = ""
+        verw = ""
+        anz = 0
+        Do While Range("E" & myRow).Value = cat
+            num = num & Range("A" & myRow).Value & Chr(10)
+            bez = bez & Range("B" & myRow).Value & " " & Range("C" & myRow).Value & " Stk." & Chr(10)
+            If Range("H" & myRow).Value <> "" Then
+                verw = verw & "E24" & Chr(10)
+            ElseIf Range("I" & myRow).Value <> "" Then
+                verw = verw & "Kantine" & Chr(10)
+            Else
+                verw = verw & " Abt.spez." & Chr(10)
+            End If
+            anz = anz + Int(Range("C" & myRow).Value)
+            myRow = myRow + 1
+        Loop
+        Sheets(blatt).Activate
+        Range("A" & i) = Left(num, Len(num) - 1)
+        Range("A" & i).HorizontalAlignment = xlRight
+        Range("B" & i) = Left(bez, Len(bez) - 1)
+        Range("B" & i).HorizontalAlignment = xlLeft
+        Range("C" & i) = cat
+        Range("C" & i).HorizontalAlignment = xlLeft
+        Range("D" & i) = anz
+        Range("D" & i).HorizontalAlignment = xlRight
+        Range("D" & i).Font.Bold = True
+        Range("E" & i) = Left(verw, Len(verw) - 1)
+        Range("E" & i).HorizontalAlignment = xlRight
+
+        Range("A" & i & ":E" & i).Borders.LineStyle = xlDot
+        Range("A" & i & ":E" & i).Font.Size = 9
+
+        i = i + 1
+    Loop
+
+    Range("A" & i & ":E" & 20).Value = ""
+    Range("A" & i & ":E" & 20).Borders.LineStyle = xlNone
+
+    Sheets(blatt).ChartObjects(1).Activate
+    ActiveChart.SetSourceData Source:=Range("C" & 6 & ":D" & i - 1)
+    
+    Sheets("Vorlage").Activate
+    Range("A" & first & ":K" & last).Sort _
+    Key1:=Range("F" & first & ":F" & last), Order1:=xlAscending, Header:=xlNo, Orientation:=xlTopToBottom, _
+    Key2:=Range("E" & first & ":E" & last), Order1:=xlAscending, Header:=xlNo, Orientation:=xlTopToBottom
+End Sub

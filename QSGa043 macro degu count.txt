@@ -1,0 +1,104 @@
+Sub aktualisieren(myName As String)
+
+    myRow = 4
+    Do While Sheets("Original").Range("A" & myRow) <> ""
+        myRow = myRow + 1
+    Loop
+    Dim numOfArt As Integer
+    numOfArt = myRow - 1
+    
+    numOfRandArt = Sheets(myName).Range("B1").Value
+    
+    myRow = 4
+    effNumOfArt = 0
+    Do While (Sheets("Original").Range("A" & myRow) <> "")
+        If Sheets("Original").Rows(myRow).Hidden = False Then
+            effNumOfArt = effNumOfArt + 1
+        End If
+        myRow = myRow + 1
+    Loop
+    
+    ReDim artNr(numOfRandArt) As Integer
+    
+    If (numOfRandArt > effNumOfArt) Then
+        MsgBox ("Anzahl kann höchstens " & effNumOfArt & " sein")
+        Exit Sub
+    End If
+
+    myRow = 4
+    Do While numOfRandArt > 0
+        randNum = getValidRandNum(numOfArt, artNr)
+        Sheets(myName).Range("A" & myRow & ":B" & myRow).Value = Sheets("Original").Range("A" & randNum & ":B" & randNum).Value
+        Sheets(myName).Range("C" & myRow & ":D" & myRow).Value = Sheets("Original").Range("S" & randNum & ":T" & randNum).Value
+        If myName = "Risiko" Then
+            Sheets(myName).Range("E" & myRow).Value = Sheets("Original").Range("R" & randNum).Value
+        End If
+        If myName = "Degu" Then
+            Sheets(myName).Range("E" & myRow).Value = Sheets("Original").Range("R" & randNum).Value
+            Sheets(myName).Range("F" & myRow).Value = Sheets("Original").Range("U" & randNum).Value
+        End If
+        If myName = "Gewicht" Then
+            Sheets(myName).Range("E" & myRow).Value = Sheets("Original").Range("R" & randNum).Value
+            Sheets(myName).Range("F" & myRow).Value = Sheets("Original").Range("E" & randNum).Value
+        End If
+        numOfRandArt = numOfRandArt - 1
+        myRow = myRow + 1
+    Loop
+    
+    Do While myRow < 150
+        Sheets(myName).Range("A" & myRow & ":K" & myRow).Value = ""
+        myRow = myRow + 1
+    Loop
+
+End Sub
+
+Function getValidRandNum(num As Integer, artArray As Variant)
+    Dim randomNumber As Integer
+    randomNumber = Int((num - 4 + 1) * Rnd + 4)
+    If (Sheets("Original").Rows(randomNumber).Hidden = True Or arrayContains(artArray, randomNumber)) Then
+        getValidRandNum = getValidRandNum(num, artArray)
+    Else
+        getValidRandNum = randomNumber
+        If Not insertInArray(artArray, randomNumber) Then
+            MsgBox ("Array Problem")
+        End If
+    End If
+End Function
+
+Function arrayContains(myArray As Variant, num As Integer)
+    i = 0
+    Do Until i > UBound(myArray) - 1
+        If myArray(i) = num Then
+            arrayContains = True
+            Exit Function
+        End If
+        i = i + 1
+    Loop
+    arrayContains = False
+End Function
+
+Function insertInArray(myArray As Variant, num As Integer)
+    i = 0
+    Do Until i > UBound(myArray) - 1
+        If Not myArray(i) > 0 Then
+            myArray(i) = num
+            insertInArray = True
+            Exit Function
+        End If
+        i = i + 1
+    Loop
+    insertInArray = False
+End Function
+
+Sub Degu()
+    aktualisieren ("Degu")
+End Sub
+
+Sub Risiko()
+    aktualisieren ("Risiko")
+End Sub
+
+Sub Gewicht()
+    aktualisieren ("Gewicht")
+End Sub
+
