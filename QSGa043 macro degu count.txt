@@ -24,22 +24,29 @@ Sub aktualisieren(myName As String)
         MsgBox ("Anzahl kann höchstens " & effNumOfArt & " sein")
         Exit Sub
     End If
+    
+    hbk1 = getColumn("HBK1")
+    hbk2 = getColumn("HBK2")
+    lager = getColumn("Lager")
+    degu30 = getColumn("Degu" & Chr(10) & ">30d")
+    gewichtg = getColumn("Gewicht" & Chr(10) & "(g)")
 
     myRow = 4
     Do While numOfRandArt > 0
         randNum = getValidRandNum(numOfArt, artNr)
         Sheets(myName).Range("A" & myRow & ":B" & myRow).Value = Sheets("Original").Range("A" & randNum & ":B" & randNum).Value
-        Sheets(myName).Range("C" & myRow & ":D" & myRow).Value = Sheets("Original").Range("S" & randNum & ":T" & randNum).Value
+        Sheets(myName).Range("C" & myRow).Value = Sheets("Original").Cells(randNum, hbk1).Value
+        Sheets(myName).Range("D" & myRow).Value = Sheets("Original").Cells(randNum, hbk2).Value
         If myName = "Risiko" Then
-            Sheets(myName).Range("E" & myRow).Value = Sheets("Original").Range("R" & randNum).Value
+            Sheets(myName).Range("E" & myRow).Value = Sheets("Original").Cells(randNum, lager).Value
         End If
         If myName = "Degu" Then
-            Sheets(myName).Range("E" & myRow).Value = Sheets("Original").Range("R" & randNum).Value
-            Sheets(myName).Range("F" & myRow).Value = Sheets("Original").Range("U" & randNum).Value
+            Sheets(myName).Range("E" & myRow).Value = Sheets("Original").Cells(randNum, lager).Value
+            Sheets(myName).Range("F" & myRow).Value = Sheets("Original").Cells(randNum, degu30).Value
         End If
         If myName = "Gewicht" Then
-            Sheets(myName).Range("E" & myRow).Value = Sheets("Original").Range("R" & randNum).Value
-            Sheets(myName).Range("F" & myRow).Value = Sheets("Original").Range("E" & randNum).Value
+            Sheets(myName).Range("E" & myRow).Value = Sheets("Original").Cells(randNum, lager).Value
+            Sheets(myName).Range("F" & myRow).Value = Sheets("Original").Cells(randNum, gewichtg).Value
         End If
         numOfRandArt = numOfRandArt - 1
         myRow = myRow + 1
@@ -88,6 +95,15 @@ Function insertInArray(myArray As Variant, num As Integer)
         i = i + 1
     Loop
     insertInArray = False
+End Function
+
+Function getColumn(name As String)
+    getColumn = -1
+    For i = 1 To Sheets("Original").Range("A1").End(xlToRight).Column
+        If Sheets("Original").Cells(1, i) = name Then
+            getColumn = i
+        End If
+    Next i
 End Function
 
 Sub Degu()
